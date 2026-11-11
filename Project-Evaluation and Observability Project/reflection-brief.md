@@ -98,7 +98,7 @@ The snippet uses hand-made labels: six samples, and only two in the failing cell
 |---|---|
 | Passing test count | 25 |
 | Document run | evidence/system-1/fixtures_documents_appraisal_informal.json |
-| Classified type | Normal |
+| Classified type | Consistent |
 
 **2a. Two guarantees.** Paste your discrepancy-run output. Tool use already forces valid JSON, yet the
 validator still catches a bad sum. Why are these two different guarantees? Name one error each cannot
