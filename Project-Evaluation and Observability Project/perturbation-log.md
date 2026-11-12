@@ -39,17 +39,43 @@ The unperturbed run made multiple API calls, while the perturbed run only run 1 
 
 ### System 2 — schema-enforced two-pass extraction
 
-- **Change I made (file + what I changed):** Removed bonus field
-- **Command I ran:** .venv/Scripts/mortgage-extract fixtures/documents/income_missing_bonus.txt --mode replay
-- **What I predicted:** The system would make those fields null. 
+- **Change I made (file + what I changed):** Removed Property Address field
+- **Command I ran:** .venv/Scripts/mortgage-extract fixtures/documents/appraisal_informal_sqft_perturbation.txt --mode auto
+- **What I predicted:** The system would break because that is a mandatory field. 
 - **What actually happened (paste the key output line):**
 
-"bonus_monthly": null,
-"bonus_ytd": null,
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\claude_project\system-2\.venv\Scripts\mortgage-extract.exe\__main__.py", line 5, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "C:\claude_project\system-2\mortgage_extractor\__main__.py", line 60, in main
+    extraction = pipeline.run(document_text)
+  File "C:\claude_project\system-2\mortgage_extractor\pipeline.py", line 60, in run
+    return self.extract(document_text, classification.document_type)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\claude_project\system-2\mortgage_extractor\pipeline.py", line 128, in extract
+    return MortgageExtraction.model_validate(block.input)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\claude_project\system-2\.venv\Lib\site-packages\pydantic\main.py", line 792, in model_validate
+    return cls.__pydantic_validator__.validate_python(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        obj,
+        ^^^^
+    ...<5 lines>...
+        by_name=by_name,
+        ^^^^^^^^^^^^^^^^
+    )
+    ^
+pydantic_core._pydantic_core.ValidationError: 1 validation error for MortgageExtraction
+loan.amount
+  Input should be a valid number [type=float_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.14/v/float_type
 
 - **How this differs from the unperturbed run:**
 
-The bonus fields are null because the file didn't have incoming bonus field. This is better than an invented field because it would be harder to differ it from a real value.
+The unperturbed run was finished as expected, while the perturbed run didn't finish and threw an error. This is because the address field is required and the field couldn't be null as per the schema defined ("address": {"type": "string"}).
 
 ### System 3 — multi-source synthesis
 
@@ -69,3 +95,5 @@ The run still finished, but it wasn't able to gather the logistics due to the ti
  late_shipment_count  says "timeout reading logistics", while  production_capacity_utilization  says "no source reported this metric". The first is a retryable failure and the second is a real gap.
 
  With logistics gone, the 95.0 vs 78.0 disagreement disappeared. The timeout run shows  on_time_delivery_rate  as a clean 95.0% under Well-Established, with no escalation. That looks reassuring but is misleading, because the number the supplier reports about itself is no longer being checked against the logistics data. The "Sources unavailable" banner is the only warning that this clean result is partial.
+
+ The unperturbed run is able to check against the logistics data because there is no timeout.
