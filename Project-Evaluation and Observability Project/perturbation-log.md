@@ -35,7 +35,7 @@ own experiment earns more credit).
 
 - **How this differs from the unperturbed run:**
 
-The unperturbed run made multiple API calls, while the perturbed run only run 1 API call. The unperturbed run displayed the normal behaviour, assigning some to auto_approve, human_review or spot_check. The perturbed run didn't assign any to those fields.
+The unperturbed run made multiple API calls, while the perturbed run only run 1 API call. The unperturbed run displayed the normal behaviour, assigning some to auto_approve, human_review or spot_check. The perturbed run didn't assign any to those fields and displayed one escalation.
 
 ### System 2 — schema-enforced two-pass extraction
 
