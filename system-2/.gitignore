@@ -1,11 +1,10 @@
 .venv/
 __pycache__/
-*.egg-info/
+*.pyc
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-*.pyc
-.DS_Store
+*.egg-info/
 .env
-.env.*
-!.env.example
+build/
+dist/

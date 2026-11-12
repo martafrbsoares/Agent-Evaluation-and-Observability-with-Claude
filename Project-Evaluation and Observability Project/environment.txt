@@ -1,0 +1,2 @@
+Python version: 3.14.4
+OS: Windows 11, 64-bit operating system, x64-based processor

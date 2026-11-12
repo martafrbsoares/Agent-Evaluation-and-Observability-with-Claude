@@ -13,7 +13,7 @@
 
 | Field | Value |
 |---|---|
-| OS & version |  |
+| OS & version | Windows 11, 64-bit operating system, x64-based processor |
 | Python version | 3.14.4 |
 | Date run | 11/11/2026 |
 | Ran any system live? (which) | Yes. The system 2. |
@@ -25,7 +25,7 @@
 | Evidence | Value |
 |---|---|
 | Passing test count | 45 |
-| Routing output file | evidence/system-2/policy_extractor_live_run.json |
+| Routing output file | evidence/system-1/policy_extractor_live_run.json |
 | auto_approve / human_review / spot_check counts | 0 / 9 / 0 |
 
 **1a. Retry boundary.** From your perturbation run (a required field removed), paste the escalation
@@ -43,9 +43,9 @@ Escalation record:
   "reason": "Field 'premium_amount' returned null \u2014 the source document does not contain this information. Retry is futile; escalate to human review."
 }
 
-It made 1 API calls, as you can see in the screenshot evidence/system-2/perturbation.png.
+It made 1 API calls, as you can see in the screenshot evidence/system-1/perturbation.png.
 
-A futile case is one where the document lacks a required field. Retrying it is worse than escalating it for four reasons.
+A futile case is one where the document lacks a required field. Retrying it is worse than escalating it for four reasons:
 
 • It can't succeed. The model can only read what's in the document. Every retry gets the same input, so the same validation failure comes back.
 • It wastes calls. Each retry is another API call. With  max_retries=3 , that's up to 4 calls instead of 1, with no gain.
@@ -57,7 +57,7 @@ A futile case is one where the document lacks a required field. Retrying it is w
 three signals (confidence, reviewer, integration) sent it to a human? If you had trusted the model's
 confidence alone, what would have happened?
 
-I've picked the POL-2025-004 from system-2/routing.json.
+I've picked the POL-2025-004 from system-1/routing.json.
 
 The signal sent it to a human was the reviewer. The independent reviewer disagreed with the extractor on deductible.
 
@@ -71,7 +71,7 @@ If I had trusted confidence alone, the record would have been auto-approved, sin
 its confidence, plus the overall figure. What does slicing by `policy_type × field` catch that a
 single number hides?
 
-The callibration snippet can be found on evidence/system-2/policy_extractor_briefing.png:
+The callibration snippet can be found on evidence/system-1/policy_extractor_briefing.png:
 
 auto      premium_amount  n=3 conf=0.95 acc=1.00 brier=0.003
 home      deductible      n=1 conf=0.90 acc=1.00 brier=0.010
@@ -97,14 +97,14 @@ The snippet uses hand-made labels: six samples, and only two in the failing cell
 | Evidence | Value |
 |---|---|
 | Passing test count | 25 |
-| Document run | evidence/system-1/fixtures_documents_appraisal_informal.json |
+| Document run | evidence/system-2/fixtures_documents_appraisal_informal.json |
 | Classified type | Consistent |
 
 **2a. Two guarantees.** Paste your discrepancy-run output. Tool use already forces valid JSON, yet the
 validator still catches a bad sum. Why are these two different guarantees? Name one error each cannot
 catch.
 
-Discrepancy-run output from evidence/system-1/fixtures_documents_income_sum_mismatch.json:
+Discrepancy-run output from evidence/system-2/fixtures_documents_income_sum_mismatch.json:
 
 "discrepancies": [
   {
@@ -131,7 +131,7 @@ An error each can't catch:
 **2b. Refusing to fabricate.** Run on a document missing a field. Paste that field's output. Why null
 instead of an invented value? Point to the schema choice that allows it.
 
-The field output from evidence/system-1/fixtures_documents_income_missing_bonus.json: null.
+The field output from evidence/system-2/fixtures_documents_income_missing_bonus.json: null.
 
 {
   ...
@@ -140,6 +140,12 @@ The field output from evidence/system-1/fixtures_documents_income_missing_bonus.
   ...
 }
 
+Schema choice:
+
+class Income(_BaseRecord):
+    bonus_monthly: float | None = None
+    bonus_ytd: float | None = None
+
 It is null instead of an invented value, because a fabricated value looks like real data, while
 null means "the document doesn't say it", which is better for code and reviewers to detect and handle than
 an invented value. A made-up value can't be told apart from a real one.
@@ -147,7 +153,7 @@ an invented value. A made-up value can't be told apart from a real one.
 **2c. Normalization.** Quote one field where the source text and extracted value differ in format
 ("about 2,400 sq ft" → `2400`). Why normalize at extraction time rather than downstream?
 
-On the field "gross_living_area_sqft" from evidence/system-1/fixtures_documents_appraisal_informal.json is 2400 instead of "0.46 acres (approx. 20,037 sq ft)" from system-1/fixtures/documents/appraisal_informal_sqft.txt.
+On the field "gross_living_area_sqft" from evidence/system-2/fixtures_documents_appraisal_informal.json is 2400 instead of "0.46 acres (approx. 20,037 sq ft)" from system-2/fixtures/documents/appraisal_informal_sqft.txt.
 
 Why normalize at extraction time rather than downstream:
 
@@ -236,7 +242,7 @@ Without dates, "quality problems (recall)" next to "shipments delayed" or "180 v
 output, don't trust the model's word* most clearly caught something a trusting design would have
 shipped.
 
-On system-1,  evidence\system-1\fixtures_documents_income_sum_mismatch.json - the "validation" block, from the  income_sum_mismatch.txt  pay stub.
+On system-2,  evidence\system-2\fixtures_documents_income_sum_mismatch.json - the "validation" block, from the  income_sum_mismatch.txt  pay stub.
 
 The model extracted every field correctly and returned perfectly valid JSON:
 
@@ -260,7 +266,7 @@ something you observed.
 
 What I observed
 
-1. The live run,  evidence\system-2\policy_extractor_live_run.json :
+1. The live run,  evidence\system-1\policy_extractor_live_run.json :
 • It wrote 9 decisions:  auto_approve: 0 ,  human_review: 9 ,  spot_check: 0 . The pipeline auto-approved nothing on confidence alone.
 • The pattern summary shows why.  POL-2025-010  has  premium_does_not_match_components  (category: consistency).  POL-2025-009  has  endorsements_absent  (category: missing_source).
 • A model can report high confidence on a number and still be wrong, and the cross-field arithmetic check caught that for  POL-2025-010 .

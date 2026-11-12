@@ -3,34 +3,30 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "policy-extractor"
+name = "mortgage-document-extraction-system"
 version = "0.2.0"
-description = "Insurance policy renewal extraction pipeline with retry, batch, independent review, and confidence-based HITL routing."
+description = "Resilient mortgage document extraction with tool-based structured output."
 requires-python = ">=3.11"
 dependencies = [
   "anthropic>=0.40",
+  "pydantic>=2.7",
 ]
 
 [project.optional-dependencies]
 dev = [
   "pytest>=8",
-  "pytest-asyncio>=0.23",
   "mypy>=1.10",
   "ruff>=0.5",
 ]
 
 [project.scripts]
-policy-extractor = "policy_extractor.__main__:main"
+mortgage-extract = "mortgage_extractor.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["policy_extractor*"]
+include = ["mortgage_extractor*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-asyncio_mode = "auto"
-markers = [
-    "live: hits the real Anthropic API; requires ANTHROPIC_API_KEY",
-]
 
 [tool.mypy]
 python_version = "3.11"
@@ -38,7 +34,7 @@ strict = true
 disallow_untyped_defs = true
 
 [[tool.mypy.overrides]]
-module = ["anthropic.*"]
+module = ["anthropic", "anthropic.*"]
 ignore_missing_imports = false
 
 [tool.ruff]
@@ -47,3 +43,6 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"mortgage_extractor/prompts.py" = ["E501"]
